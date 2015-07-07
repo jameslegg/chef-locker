@@ -9,4 +9,6 @@ group :develepment do
   gem 'foodcritic'
   gem 'serverspec'
   gem 'chefspec', '>= 4.2'
+  # for chefspec tests
+  gem 'zk'
 end

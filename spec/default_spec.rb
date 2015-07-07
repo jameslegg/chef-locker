@@ -2,7 +2,7 @@
 # Cookbook Name:: clocker
 # Spec:: default
 #
-# Copyright (c) 2015 The Authors, All Rights Reserved.
+# Copyright (c) 2015 James Legg
 
 require 'spec_helper'
 
@@ -15,9 +15,12 @@ describe 'clocker::default' do
       runner.converge(described_recipe)
     end
 
-    it 'converges successfully' do
-      chef_run # This should not raise an error
+    it 'installs zk gem' do
+      expect(chef_run).to install_chef_gem('zk')
     end
 
+    it 'installs build essentials' do
+      expect(chef_run).to install_package('build-essential')
+    end
   end
 end

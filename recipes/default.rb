@@ -10,7 +10,7 @@ end
 be.run_action(:install)
 
 chef_gem 'zk' do
-  action :nothing
+  action :install
   compile_time true if Chef::Resource::ChefGem.method_defined?(:compile_time)
 end
 

@@ -1,4 +1,5 @@
 class Chef::Recipe::Clocker
+  # Our wrapper around the functionality in ZK gem
   class Zk
     attr_accessor :zkconn
 
@@ -7,13 +8,17 @@ class Chef::Recipe::Clocker
     end
 
     # check lock
-    def clock?(lock_id, chef_node)
+    def clock?(lock_id)
       zkconn.stat("/clocker-#{lock_id}").exists?
     end
 
-    # set lock
-    def clockon(lock_id, chef_node)
-      zkconn.create("/clocker-#{lock_id}", chef_node)
+    # set a lock sleep wait seconds between retries
+    def clockon(lock_id, chef_node, wait = nil, retries = nil)
+      lock = zkconn.create("/clocker-#{lock_id}", chef_node)
+      while retries > 1 && !lock
+        sleep(wait)
+        lock = zkconn.create("/clocker-#{lock_id}", chef_node)
+      end
     end
 
     # release lock (if we are the owner)
@@ -38,9 +43,8 @@ class Chef::Recipe::Clocker
 
     # get lock info
     def glock(lock_id)
-      unless zkconn.stat("/clocker-#{lock_id}")
-        zkconn.get("/clocker-#{lock_id}")
-      end
+      zkconn.get("/clocker-#{lock_id}") unless zkconn.stat(
+        "/clocker-#{lock_id}")
     end
 
     def close
@@ -48,22 +52,31 @@ class Chef::Recipe::Clocker
     end
   end
 
+  # Provide ability to use chef locks from a recipe
   class Lock
-    def self.exists?(zk_host, lock_id, chef_node)
-      Zk.new(zk_host).clock?(lock_id, chef_node)
+    def self.exists?(zk_host, lock_id)
+      Zk.new(zk_host).clock?(lock_id)
+      msg = "clocker lock #{lock_id} exists on #{zk_host}"
+      Chef::Log.debug(msg)
     end
 
     def self.clockon(zk_host, lock_id, chef_node)
-      unless Zk.new(zk_host).clock?(lock_id, chef_node)
-        ret = Zk.new(zk_host).clockon(lock_id, chef_node)
+      if Zk.new(zk_host).clock?(lock_id)
+        msg = "clocker lock #{lock_id} id: #{chef_node} NOT obtained"
+        msg << " on #{zk_host}"
+        Chef::Log.debug(msg)
       else
-        ret = false
+        Zk.new(zk_host).clockon(lock_id, chef_node)
+        msg = "clocker lock #{lock_id} id: #{chef_node} obtained on #{zk_host}"
+        Chef::Log.debug(msg)
       end
-      return ret
     end
 
     def self.clockoff(zk_host, lock_id, chef_node)
-      unless Zk.new(zk_host).clockoff(lock_id, chef_node)
+      if Zk.new(zk_host).clockoff(lock_id, chef_node)
+        msg = "clocker lock #{lock_id} id: #{chef_node} removed from #{zk_host}"
+        Chef::Log.debug(msg)
+      else
         owner = Zk.new(zk_host).glock(lock_id)
         Chef::Log.info("Unable to remove: #{lock_id}, owned by: #{owner}")
         return false
@@ -72,7 +85,11 @@ class Chef::Recipe::Clocker
 
     # force a lock removal
     def self.flockoff(zk_host, lock_id)
-      unless Zk.new(zk_host).flockoff(lock_id)
+      if Zk.new(zk_host).flockoff(lock_id)
+        msg = "clocker lock #{lock_id} id: #{chef_node} force removed"
+        msg << "from #{zk_host}"
+        Chef::Log.debug(msg)
+      else
         Chef::Log.fatal("Unable to force removal of: #{lock_id}!")
       end
     end

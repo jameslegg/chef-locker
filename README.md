@@ -5,6 +5,12 @@ A rudimentary Chef Locking mechanism that uses zookeeper as a backend.
 Designed to control chef runs across cluster of machines where changes/restarts
 are need to be careful co-ordinated to prevent downtime.
 
+# Requirments
+
+Installs the ZK gem using chef-gem
+
+Needs a zookeeper(s)!
+
 # Usage
 
 Include the recipe
@@ -39,5 +45,5 @@ Clocker::Lock.flockoff('myzookeeper:2181','foo_cluster_lock')
 It is possible to check if a lock exists
 
 ```
-Clocker::Lock.exists('myzookeeper:2181','foo_cluster_lock', node['hostname'])
+Clocker::Lock.exists('myzookeeper:2181','foo_cluster_lock')
 ```
