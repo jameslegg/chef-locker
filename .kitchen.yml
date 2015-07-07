@@ -1,0 +1,32 @@
+---
+driver:
+  name: docker
+  <% if (RUBY_PLATFORM =~ /darwin/) %>
+  socket: <%= "#{ENV['DOCKER_HOST']}" %>
+  docker_path: /usr/local/bin/docker
+  <% else %>
+  docker_path: /usr/bin/docker
+  <% end %>
+  require_chef_omnibus: true
+  disable_upstart: false
+  provision_command:
+    - apt-get update
+    - chown root:root /usr/bin/sudo
+    - chmod 4755 /usr/bin/sudo
+  use_cache: false
+  remove_images: true
+
+provisioner:
+  name: chef_zero
+  cookbook_path: test/cookbooks
+
+platforms:
+  - name: ubuntu-12.04
+
+suites:
+  - name: cl-test
+    run_list:
+      - recipe[cl_test::default]
+    driver:
+      links:
+        - clocker_zookeeper_1:solr

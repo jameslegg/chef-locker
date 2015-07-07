@@ -1,0 +1,7 @@
+name             'clocker'
+maintainer       'The Authors'
+maintainer_email 'you@example.com'
+license          'all_rights'
+description      'Installs/Configures clocker'
+long_description 'Installs/Configures clocker'
+version          '0.1.0'

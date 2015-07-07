@@ -1,0 +1,2 @@
+zookeeper:
+  image: jplock/zookeeper
