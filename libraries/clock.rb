@@ -8,30 +8,37 @@ class Chef::Recipe::Clocker
     end
 
     # check lock
-    def clock?(lock_id)
+    def exists?(lock_id)
       zkconn.stat("/clocker-#{lock_id}").exists?
     end
 
     # set a lock sleep wait seconds between retries
-    def clockon(lock_id, chef_node, wait = nil, retries = nil)
-      lock = zkconn.create("/clocker-#{lock_id}", chef_node)
-      puts lock
-      puts "lock is above"
-      while retries && retries > 1 && !lock
-        msg = "clocker lock #{lock_id} already exists on #{zk_host}"
-        msg << "#{retries} left, waiting #{wait} seconds"
+    def clockon(lock_id, chef_node, wait, retries)
+      puts "clocking on #{lock_id}"
+      zkconn.create("/clocker-#{lock_id}", chef_node) unless
+        zkconn.exists?("/clocker-#{lock_id}")
+      lock = nil
+      while retries && retries > 0 && !lock
+        msg = "clocker lock #{lock_id} already exists "
+        msg << "#{retries} retries left, waiting #{wait} seconds"
         Chef::Log.info(msg)
+        puts msg
         puts "sleeping a bit"
         sleep(wait)
-        lock = zkconn.create("/clocker-#{lock_id}", chef_node)
+        unless zkconn.exists?("/clocker-#{lock_id}")
+          lock = zkconn.create("/clocker-#{lock_id}", chef_node)
+        end
+        retries -=1
       end
+      return lock
     end
 
     # release lock (if we are the owner)
     def clockoff(lock_id, chef_node)
       if zkconn.stat("/clocker-#{lock_id}").exists?
-        if zkconn.get("/clocker-#{lock_id}") == chef_node
+        if glock("#{lock_id}") == chef_node
           zkconn.delete("/clocker-#{lock_id}")
+          return true
         end
       else
         return false
@@ -42,6 +49,7 @@ class Chef::Recipe::Clocker
     def flockoff(lock_id)
       if zkconn.stat("/clocker-#{lock_id}").exists?
         zkconn.delete("/clocker-#{lock_id}")
+        return true
       else
         return false
       end
@@ -62,21 +70,25 @@ class Chef::Recipe::Clocker
 
   # Provide ability to use chef locks from a recipe
   class Lock
-    def self.exists?(zk_host, lock_id)
-      Zk.new(zk_host).clock?(lock_id)
+    def self.clock?(zk_host, lock_id)
+      status =Zk.new(zk_host).exists?(lock_id)
       msg = "clocker lock #{lock_id} exists on #{zk_host}"
       Chef::Log.info(msg)
+      status
     end
 
     def self.clockon(zk_host, lock_id, chef_node, wait = nil, retries = nil)
-      if Zk.new(zk_host).clock?(lock_id)
+      if Zk.new(zk_host).exists?(lock_id)
         msg = "clocker lock #{lock_id} id: #{chef_node} allready exists"
-        msg << " on #{zk_host}"
+        msg << " on #{zk_host} waiting for #{wait} retrying #{retries}"
+        Zk.new(zk_host).clockon(lock_id, chef_node, wait, retries)
         Chef::Log.info(msg)
+        return false
       else
         Zk.new(zk_host).clockon(lock_id, chef_node, wait, retries)
         msg = "clocker lock #{lock_id} id: #{chef_node} obtained on #{zk_host}"
         Chef::Log.info(msg)
+        return true
       end
     end
 
@@ -94,7 +106,7 @@ class Chef::Recipe::Clocker
     # force a lock removal
     def self.flockoff(zk_host, lock_id)
       if Zk.new(zk_host).flockoff(lock_id)
-        msg = "clocker lock #{lock_id} id: #{chef_node} force removed"
+        msg = "clocker lock #{lock_id} forcibly removed"
         msg << "from #{zk_host}"
         Chef::Log.warn(msg)
       else
