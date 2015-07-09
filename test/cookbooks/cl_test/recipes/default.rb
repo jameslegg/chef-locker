@@ -1,22 +1,21 @@
 # Include clocker to get the zk gem
 include_recipe 'clocker'
-
 if Clocker::Lock.clockon('clocker_zookeeper_1:2181', 'testlock-A',
                          node['hostname'])
-  log "INCORRECT: did not take Lock A"
-else
   log "CORRECT: Taken Lock A"
+else
+  log "INCORRECT: did not take Lock A"
 end
 
 # try and take the lock again wait 2 seconds, retry 3 times
 if Clocker::Lock.clockon('clocker_zookeeper_1:2181', 'testlock-A',
                          node['hostname'], 2, 3)
-  log "CORRECT: did not take Lock A as it was already taken"
-else
   log "INCORRECT: Took Lock A again"
+else
+  log "CORRECT: did not take Lock A as it was already taken"
 end
 
-if Clocker::Lock.exists?('clocker_zookeeper_1:2181', 'testlock-A')
+if Clocker::Lock.clock?('clocker_zookeeper_1:2181', 'testlock-A')
   log "CORRECT: Lock A exists"
 else
   log "INCORRECT: Lock A does not exist"
@@ -25,8 +24,8 @@ end
 Clocker::Lock.clockoff('clocker_zookeeper_1:2181', 'testlock-A',
                        node['hostname'])
 
-if Clocker::Lock.exists?('clocker_zookeeper_1:2181', 'testlock-B')
-  log "INCORRECT: Lock B exists"
+if Clocker::Lock.clock?('clocker_zookeeper_1:2181', 'testlock-B')
+  log "INCORRECT: Locklock B exists"
 else
   log "CORRECT: Lock B does not exist"
 end
@@ -49,7 +48,7 @@ else
   log "INCORRECT: Lock C was unable to be forcibly unlocked"
 end
 
-if Clocker::Lock.exists?('clocker_zookeeper_1:2181', 'testLock-C')
+if Clocker::Lock.clock?('clocker_zookeeper_1:2181', 'testlock-C')
   log "INCORRECT: Lock C exists"
 else
   log "CORRECT: Lock C does not exist"

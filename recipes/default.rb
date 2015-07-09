@@ -14,4 +14,4 @@ chef_gem 'zk' do
   compile_time true if Chef::Resource::ChefGem.method_defined?(:compile_time)
 end
 
-require 'zk'
+#require 'zk'
