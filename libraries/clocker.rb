@@ -12,7 +12,6 @@ class Clocker
       if @@zkls.include?(lock)
         Chef::Log.debug("Returning locker for #{lock}")
         @@zkls[lock]
-        #@@zkls[lock].locker(lock)
       elsif zookeeper
         Chef::Log.debug("Creating zookeeper connection for #{lock}")
         zkc = ZK.new(zookeeper)
@@ -100,7 +99,12 @@ class Chef
 
     def action_clockon
       Chef::Log.info("Taking lock: #{@lockid}")
-      @aclocker.lock({ :wait => @lockwait })
+      begin
+        @aclocker.lock({ :wait => @lockwait })
+      rescue ZK::Exceptions::LockWaitTimeoutError
+        Chef::Log.warn("Unable to obtain #{@lockid}")
+        return false
+      end
     end
 
     def action_clockoff
