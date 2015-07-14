@@ -8,7 +8,7 @@ class Clocker
       @@zkls = {} # rubocop:disable Style/ClassVars
     end
 
-    # Create or retrieve a locker as appriate
+    # Create or retrieve a locker as appropriate
     # rubocop:disable Style/MethodLength
     def locker(lock, zookeeper = nil)
       require 'zk'
