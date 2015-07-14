@@ -17,9 +17,9 @@ log 'Then hlock-fake lock does not exist, this log message will not appear' do
   only_if { Clocker.held?('hlock-fake', run_context) }
 end
 
-log "sleeping for 300 seconds"
+log "sleeping for 200 seconds"
 
-execute 'sleep 300'
+execute 'sleep 200'
 
 log 'The lock hlock-test still exists and is still held' do
   level :warn

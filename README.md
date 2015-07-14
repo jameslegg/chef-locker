@@ -16,7 +16,7 @@ Overview
 
 Locks are taken out using the clocker resource.
 
-After you obtain a lock you MUST use the Clocker.held? method with a guard on
+After you obtain a lock you MUST use the Clocker#held? method with a guard on
 all resources that you want to prevent running when you don't hold the lock.
 
 If you Chef run crashes the connection to zookeeper will close and your locks
@@ -26,7 +26,11 @@ for implementation details.
 Usage
 ------
 
-Use the clocker resource to clockon and clockoff a lock. 
+Use the clocker resource to clockon and clockoff a lock.
+
+If it is not possible to gain the lock the chef run continues and Clocker#held?
+returns false. At this time it is expected that retries are done by re-running
+chef.
 
 ### Include the recipe
 ```
@@ -37,7 +41,22 @@ Resource/Provider
 ----------------
 ### clocker
 
+## Attributes
+
+ *  lockid - lock-test1
+
+ * lockwait - needs to be 20 seconds or less to have a chance of gaining
+           the lock because of connection timeouts. For most chef resources
+           waiting for the lock to free up is not practical curently.
+
+ * zookeeper - a string in the format hostname:port
+
+ * action - :clockon, clockoff
+
+## Examples
 Taking a lock (clockon action)
+
+
 ```
 clocker 'lock-test1' do
   lockid 'lock-test1'
@@ -56,7 +75,7 @@ clocker 'lock-test1' do
 end
 ```
 
-### Clocker.held?
+### Clocker#held?
 Method for use with other resource that should check the status of a lock before
 any changes are made. Please note that you MUST pass run_context as the 2nd arg.
 

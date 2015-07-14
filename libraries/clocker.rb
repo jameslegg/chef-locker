@@ -106,7 +106,10 @@ class Chef
       Chef::Log.info("Taking lock: #{@lockid}")
       begin
         @aclocker.lock(:wait => @lockwait)
-      rescue ZK::Exceptions::LockWaitTimeoutError
+      rescue ZK::Exceptions::LockWaitTimeoutError,
+        Zookeeper::Exceptions::ContinuationTimeoutError
+        # ContinuationTimeoutError rescued when waiting for the lock fails
+        # We don't get the lock, but we don't fail the chef run
         Chef::Log.warn("Unable to obtain #{@lockid}")
         return false
       end
