@@ -26,8 +26,7 @@ platforms:
 suites:
   - name: cl-test
     run_list:
-        #- recipe[cl_test::default]
-        - recipe[cl_test::h-test]
+        - recipe[cl_test::default]
     driver:
       links:
         - clocker_zookeeper_1:solr
