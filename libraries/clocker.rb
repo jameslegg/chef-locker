@@ -1,12 +1,15 @@
 class Clocker
+  # Abstraction of ZK gem connection and locking to allow reuse of connections
+  # betwen chef resources
   class ZKs
     def initialize
       # hash of zookeeper locks we use one connection per lock id
-      @@zkls = {}
-      return
+      # (ClassVars are needed to share between instances and chef resources)
+      @@zkls = {} # rubocop:disable Style/ClassVars
     end
 
     # Create or retrieve a locker as appriate
+    # rubocop:disable Style/MethodLength
     def locker(lock, zookeeper = nil)
       require 'zk'
       if @@zkls.include?(lock)
@@ -26,15 +29,16 @@ class Clocker
 
     def disco(lock)
       Chef::Log.debug("Disconecting #{lock}'s zookeeper connection")
-      if @@zkls.include?(lock)
-         @@zkls[lock].close
-      end
+      @@zkls[lock].close if @@zkls.include?(lock)
     end
   end
 end
 
 class Chef
+  # Clocker Class provides a point to call the held? method from within chef
+  # recipes
   class Recipe::Clocker
+    # Check with the zookeeper server if the lock is still being held
     # We need the run_context passed to us so we can look inside the resource
     # collection for our clocker resource.
     def self.held?(lock_id, run_context)
@@ -57,6 +61,7 @@ class Chef
     end
   end
 
+  # clocker resource for taking and releasing zookeeper locks
   class Resource::Clocker < Resource
     def initialize(name, run_context = nil)
       super
@@ -78,15 +83,15 @@ class Chef
     end
 
     def lockwait(arg = nil)
-      set_or_return(:lockwait, arg, kind_of: [ Integer, FalseClass, TrueClass ])
+      set_or_return(:lockwait, arg, kind_of: [Integer, FalseClass, TrueClass])
     end
 
     def zkconn(arg = nil)
-      set_or_return(:zkconn, arg, kind_of: [ Object ])
+      set_or_return(:zkconn, arg, kind_of: Object)
     end
-
   end
 
+  # provider for the clockon and clockoff actions of the clocker resource
   class Provider::Clocker < Provider
     def load_current_resource
       @name = new_resource.name
@@ -100,7 +105,7 @@ class Chef
     def action_clockon
       Chef::Log.info("Taking lock: #{@lockid}")
       begin
-        @aclocker.lock({ :wait => @lockwait })
+        @aclocker.lock(:wait => @lockwait)
       rescue ZK::Exceptions::LockWaitTimeoutError
         Chef::Log.warn("Unable to obtain #{@lockid}")
         return false

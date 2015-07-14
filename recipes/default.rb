@@ -9,9 +9,8 @@ be = package 'build-essential' do
 end
 be.run_action(:install)
 
-chef_gem 'zk' do
+# compile_time is valid but confused by https://github.com/acrmp/foodcritic/issues/339
+chef_gem 'zk' do # ~FC009
   action :install
   compile_time true if Chef::Resource::ChefGem.method_defined?(:compile_time)
 end
-
-#require 'zk'

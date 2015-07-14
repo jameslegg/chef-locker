@@ -37,3 +37,10 @@ suites:
     driver:
       links:
         - clocker_zookeeper_1:solr
+  # jenkins test suite
+  - name: jenkins
+    run_list:
+        - recipe[cl_test::jenkins]
+    driver:
+      links:
+        - clocker_zookeeper_1:solr
