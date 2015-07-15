@@ -26,7 +26,21 @@ platforms:
 suites:
   - name: cl-test
     run_list:
-      - recipe[cl_test::default]
+        - recipe[cl_test::default]
+    driver:
+      links:
+        - clocker_zookeeper_1:solr
+  # Run this suite up while the first suite is waiting
+  - name: cl-test-inuse
+    run_list:
+        - recipe[cl_test::inuse]
+    driver:
+      links:
+        - clocker_zookeeper_1:solr
+  # jenkins test suite
+  - name: jenkins
+    run_list:
+        - recipe[cl_test::jenkins]
     driver:
       links:
         - clocker_zookeeper_1:solr
