@@ -45,9 +45,7 @@ Resource/Provider
 
  *  lockid - lock-test1
 
- * lockwait - needs to be 20 seconds or less to have a chance of gaining
-           the lock because of connection timeouts. For most chef resources
-           waiting for the lock to free up is not practical curently.
+ * lockwait - Time to wait while blocking for the lock
 
  * zookeeper - a string in the format hostname:port
 

@@ -3,7 +3,7 @@ include_recipe 'clocker'
 clocker 'hlock-test' do
   lockid 'hlock-test'
   # wait 10 seconds
-  lockwait 10
+  lockwait 60
   zookeeper 'clocker_zookeeper_1:2181'
   action :clockon
 end
