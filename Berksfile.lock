@@ -1,0 +1,11 @@
+DEPENDENCIES
+  cl_test
+    path: test/cookbooks/cl_test
+  clocker
+    path: .
+    metadata: true
+
+GRAPH
+  cl_test (0.1.0)
+    clocker (>= 0.0.0)
+  clocker (0.3.0)
