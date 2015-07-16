@@ -105,7 +105,7 @@ class Chef
     def action_clockon
       Chef::Log.info("Taking lock: #{@lockid}")
       begin
-        @aclocker.lock({ :wait => @lockwait, :blocking => true})
+        @aclocker.lock(:wait => @lockwait, :blocking => true)
       rescue ZK::Exceptions::LockWaitTimeoutError
         # We don't get the lock, but we don't fail the chef run
         Chef::Log.warn("Unable to obtain #{@lockid}")
