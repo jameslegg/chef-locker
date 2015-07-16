@@ -7,23 +7,14 @@ clocker 'hlock-test' do
   action :clockon
 end
 
-log 'The lock hlock-test exists and is held' do
-  level :warn
+# This file shuld get created
+file '/var/run/hlock-test-exists' do
   only_if { Clocker.held?('hlock-test', run_context) }
 end
 
-log 'Then hlock-fake lock does not exist, this log message will not appear' do
-  level :warn
+# This file shuld not get created
+file '/var/run/hlock-fake-notexists' do
   only_if { Clocker.held?('hlock-fake', run_context) }
-end
-
-log "sleeping for 60 seconds"
-
-execute 'sleep 60'
-
-log 'The lock hlock-test still exists and is still held' do
-  level :warn
-  only_if { Clocker.held?('hlock-test', run_context) }
 end
 
 clocker 'hlock-test' do
@@ -33,7 +24,7 @@ clocker 'hlock-test' do
   action :clockoff
 end
 
-log 'The lock hlock-test is no longer held, this message will not appear' do
-  level :warn
+# This file should not get created
+file '/var/run/hlock-test-lock-expired' do
   only_if { Clocker.held?('hlock-test', run_context) }
 end
