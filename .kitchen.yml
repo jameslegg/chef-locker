@@ -29,7 +29,7 @@ suites:
         - recipe[cl_test::default]
     driver:
       links:
-        - clocker_zookeeper_1:solr
+        - clocker_zookeeper_1:zookeeper
   # Run this suite up while the first suite is waiting
   - name: cl-test-inuse
     run_list:
