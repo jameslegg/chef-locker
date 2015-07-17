@@ -19,6 +19,10 @@ Locks are taken out using the clocker resource.
 After you obtain a lock you MUST use the Clocker#held? method with a guard on
 all resources that you want to prevent running when you don't hold the lock.
 
+When using a guard to protect services from simultaneous restarts be aware that
+the default timer is :delayed and Chef does not perform an actual service
+restart until the end of the Chef run, AFTER the lock has been released.
+
 If you Chef run crashes the connection to zookeeper will close and your locks
 will be cleared up.  Please see the documentation of the [ZK](http://www.rubydoc.info/gems/zk/ZK/Locker/ExclusiveLocker) gem
 for implementation details.
