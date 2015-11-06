@@ -99,7 +99,7 @@ class Chef
       @zookeeper = new_resource.zookeeper
       @lockwait = new_resource.lockwait
       @zkconn = new_resource.zkconn
-      @aclocker = @zkconn.locker(@lockid,  @zookeeper)
+      @aclocker = @zkconn.locker(@lockid, @zookeeper)
     end
 
     def action_clockon
