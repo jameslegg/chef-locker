@@ -1,3 +1,6 @@
+## v0.3.1
+ - Fix tests.
+
 ## v0.3.0
  - Replace home grown locking mechanism with the ZK gem's implementation of
    [Lock](http://zookeeper.apache.org/doc/trunk/recipes.html#sc_recipes_Locks)

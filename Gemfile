@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'berkshelf', '~> 3'
+gem 'berkshelf', '~> 4.0'
 
 group :develepment do
   gem 'test-kitchen'
@@ -8,6 +8,7 @@ group :develepment do
   gem 'rubocop'
   gem 'foodcritic'
   gem 'serverspec'
+  gem 'chef', '= 12.5.1'
   gem 'chefspec', '>= 4.2'
   # lock nokogiri because of libxml build issues
   gem 'nokogiri', '= 1.6.3.1'

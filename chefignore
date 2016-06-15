@@ -42,6 +42,7 @@ a.out
 *.dll
 *.exe
 */rdoc/
+vendor/*
 
 # Testing #
 ###########

@@ -4,7 +4,7 @@ Encoding:
 HashSyntax:
   Enabled: false
 
-Style/SingleSpaceBeforeFirstArg:
+Style/SpaceBeforeFirstArg:
   Enabled: false
 
 Style/ClassAndModuleChildren:
